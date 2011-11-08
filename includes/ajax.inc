@@ -6,11 +6,10 @@
  * @license MPL / GPLv2 / LGPL
  * @package Provisioner
  */
-
 require 'functions.inc';
 $endpoint = new endpointmanager();
 
-include 'jsonwrapper.php';
+include 'json.inc';
 
 function in_array_recursive($needle, $haystack) {
     $it = new RecursiveIteratorIterator(new RecursiveArrayIterator($haystack));
@@ -20,6 +19,36 @@ function in_array_recursive($needle, $haystack) {
         }
     } 
     return FALSE;
+}
+
+if(isset($_REQUEST['sub_type'])) {
+    if ((isset($_REQUEST['nmap'])) AND ($_REQUEST['nmap'] == 1)) {
+        $temp = $endpoint->discover_new($_REQUEST['netmask']);
+    } else {
+        $temp = $endpoint->discover_new($_REQUEST['netmask'], FALSE);
+    }
+
+    foreach($temp as $key => $data) {
+        if ((!$data['endpoint_managed']) AND ($data['brand'])) {
+            $final[$key] = $data;
+            $final[$key]['id'] = $key;
+            $sqln = "SELECT * FROM endpointman_model_list WHERE enabled = 1 AND brand =".$data['brand_id'];
+            $model_list =& $endpoint->eda->sql($sqln,'getAll',DB_FETCHMODE_ASSOC);
+            $j = 0;
+            foreach($model_list as $row) {
+                $final[$key]['list'][$j] = $row;
+                $j++;
+            }
+        }
+    }
+
+    if(!$final) {
+        $final = NULL;
+        $endpoint->message['page:devices_manager'] = _("No Devices Found");
+    }
+    $searched = 1;
+    echo json_encode($final);
+    die();
 }
 
 if(($_REQUEST['id'] == "") OR ($_REQUEST['id'] == "0")) {
