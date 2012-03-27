@@ -26,17 +26,17 @@
         window.location.reload();
     }
         function popitup(url, name) {
-            newwindow=window.open(url + '&custom=' + document.getElementById('custom').value + '&tid=' + document.getElementById('id').value + '&value=' + document.getElementById('altconfig_'+ name).value + '&rand=' + new Date().getTime(),'name','height=710,width=800');
+            newwindow=window.open(url + '&custom=' + document.getElementById('custom').value + '&tid=' + document.getElementById('id').value + '&value=' + document.getElementById('altconfig_'+ name).value + '&rand=' + new Date().getTime(),'name','height=710,width=800,scrollbars=yes,location=no');
                 if (window.focus) {newwindow.focus()}
                 return false;
         }
         function popitup2(url, name) {
-            newwindow=window.open(url + '&custom=' + document.getElementById('custom').value + '&tid=' + document.getElementById('id').value + '&value=0_' + name + '&rand=' + new Date().getTime(),'name','height=700,width=800');
+            newwindow=window.open(url + '&custom=' + document.getElementById('custom').value + '&tid=' + document.getElementById('id').value + '&value=0_' + name + '&rand=' + new Date().getTime(),'name','height=700,width=800,scrollbars=yes,location=no');
                 if (window.focus) {newwindow.focus()}
                 return false;
         }
         function popitup3(url) {
-            newwindow=window.open(url + '&custom=' + document.getElementById('custom').value + '&tid=' + document.getElementById('id').value + '&value=0_' + name + '&rand=' + new Date().getTime(),'name','height=700,width=800');
+            newwindow=window.open(url + '&custom=' + document.getElementById('custom').value + '&tid=' + document.getElementById('id').value + '&value=0_' + name + '&rand=' + new Date().getTime(),'name','height=700,width=800,scrollbars=yes,location=no');
                 if (window.focus) {newwindow.focus()}
                 return false;
         }
@@ -44,18 +44,7 @@
 	{if condition="$custom != 0"}
         <strong><?php echo _('Template Name')?>:</strong> <i>Custom Template: Extension {$ext}</i><br />
         <strong><?php echo _('Product Line')?>:</strong> {$product}<br />
-        <strong><?php echo _('Clone of Model')?>:</strong> {$model}<br />
-        <strong><?php echo _('Display Options For')?></strong>
-        {if condition="isset($silent_mode)"}
-        <select name="area_list" onchange="window.location.href='config.php?display=epm_config&quietmode=1&handler=file&file=popup.html.php&module=endpointman&pop_type=edit_template&edit_id={$hidden_id}&model_list=126&template_list=0&rand='+ new Date().getTime() + '&maxlines='+this.options[this.selectedIndex].value">
-        {else}
-        <select name="area_list" onchange="window.location.href='config.php?type=tool&edit_template=true&display=epm_templates&custom='+ document.getElementById('custom').value +'&id='+ document.getElementById('id').value +'&maxlines='+this.options[this.selectedIndex].value">
-        {/if}
-        {loop name="area_ava"}
-        <option value="{$value.value}" {if condition="!empty($value.selected)"}selected{/if}>{$value.text}</option>
-        {/loop}
-        </select>
-        <strong><?php echo _('Line settings on this page')?></strong><i><font size="-2"> (Note: This is NOT the number of supported lines on the phone(s))</font></i>
+        <strong><?php echo _('Clone of Model')?>:</strong> {$model}<br />        
 	{/if}
         <form action="config.php?type=tool&display=epm_templates" method="post">
         {if condition="isset($silent_mode)"}
@@ -106,13 +95,7 @@
             <br/>
         {/loop}
             <br />
-            <?php echo _('You can also use certain variables in your configs')?>:<br />{noparse}
-	-"{$server.ip.1}" = <?php echo _('Server 1 IP')?><br />
-        -"{$server.port.1}" = <?php echo _('Server 1 Port')?><br />
-	-"{$mac}" = <?php echo _('Device\'s Mac Address')?><br />
-        -"{$model}" = <?php echo _('Device\'s Model')?><br />
-	-"{$ext.line.1}" = <?php echo _('Device\'s Default Extension (Line 1 or Master)')?><br />
-	-"{$displayname.line.1}" = <?php echo _('Device\'s Description in FreePBX (Usually the Full Name)')?><br />{/noparse}
+            {include="variables"}
             <br />
             {/if}
 
@@ -143,6 +126,8 @@
 							    <option value='{$value.value}' {if condition="array_key_exists('selected',$value)"}{$value.selected}{/if}>{$value.description}</option>
 							{/loop}
                                         </select>
+                                        {elseif condition="$value.type == 'checkbox'"}
+                                            <label>{if condition="isset($value.tooltip)"}<a href="#" class="info">{$value.description}<span>{$value.tooltip}</span></a>{else}{$value.description}{/if}: <input type='checkbox' name='{$value.key}' id='{$value.key}' value='{$value.value}'></label>
 					{/if}
                                     </td><td width="90%">
 						{if condition="isset($value.aried)"}

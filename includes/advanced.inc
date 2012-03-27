@@ -375,17 +375,7 @@ switch($_REQUEST['subpage']) {
 
             $phone_config = new $class();
 
-
-            if((method_exists($phone_config,'display_options')) AND (method_exists($phone_config,'process_options'))) {
-                if(isset($_REQUEST['phone_options'])) {
-                    $endpoint->tpl->assign("options", $phone_config->process_options());
-                } else {
-                    $endpoint->tpl->assign("options", $phone_config->display_options());
-                }
-            }
-
-
-
+            //TODO: remove
             $template_file_list[0]['value'] = "template_data_custom.xml";
             $template_file_list[0]['text'] = "template_data_custom.xml";
 
@@ -447,22 +437,24 @@ switch($_REQUEST['subpage']) {
             if($_POST['config_loc'][strlen($_POST['config_loc'])-1] != "/") {
                 $_POST['config_loc'] = $_POST['config_loc'] ."/";
             }
-
+            
+            $tftp_writable = FALSE;
             if((isset($_POST['config_loc'])) AND ($_POST['config_loc'] != "")) {
                 if((file_exists($_POST['config_loc'])) AND (is_dir($_POST['config_loc']))) {
                     if(is_writable($_POST['config_loc'])) {
                         $sql="UPDATE endpointman_global_vars SET value='" . $_POST['config_loc'] . "' WHERE var_name='config_location'";
                         $endpoint->eda->sql($sql);
+                        $tftp_writable = TRUE;
                     } else {
                         $endpoint->error['config_dir'] = "Directory Not Writable!";
                     }
                 } else {
-                    $endpoint->error['config_dir'] = "Not a Vaild Directory";
+                    $endpoint->error['config_dir'] = "Not a Vaild Directory <br /> Try to run 'mkdir ".$_POST['config_loc']."' as root";
                 }
             } else {
                 $endpoint->error['config_dir'] = "No Configuration Location Defined!";
             }
-
+            
             if((isset($_POST['enable_ari'])) AND ($_POST['enable_ari'] == "on")) {
                 $_POST['enable_ari'] = 1;
             } else {
@@ -487,6 +479,19 @@ switch($_REQUEST['subpage']) {
                 $_POST['allow_hdfiles'] = 1;
             } else {
                 $_POST['allow_hdfiles'] = 0;
+            }
+            if((isset($_POST['tftp_check'])) AND ($_POST['tftp_check'] == "on")) {
+                $_POST['tftp_check'] = 1;
+            } else {
+                $_POST['tftp_check'] = 0;
+            }
+            
+            $sql="UPDATE endpointman_global_vars SET value='" . $_POST['tftp_check'] . "' WHERE var_name='tftp_check'";
+            $endpoint->eda->sql($sql);
+            
+            //Check tftp server to make sure it's functioning if we are using it
+            if(($_POST['cfg_type'] == 'file') AND ($tftp_writable)) {
+                $endpoint->tftp_check();
             }
                         
             $sql="UPDATE endpointman_global_vars SET value='" . $_POST['package_server'] . "' WHERE var_name='update_server'";
@@ -557,6 +562,12 @@ switch($_REQUEST['subpage']) {
         } else {
             $allow_hdfiles = "";
         }
+        
+        if($endpoint->global_cfg['tftp_check']) {
+            $tftp_checked = "checked";
+        } else {
+            $tftp_checked = "";
+        }
 
         if($endpoint->global_cfg['debug']) {
             $debug_selected = "checked";
@@ -577,6 +588,8 @@ switch($_REQUEST['subpage']) {
         $endpoint->tpl->assign("debug_selected", $debug_selected);
 
         $endpoint->tpl->assign("hdfiles_selected", $allow_hdfiles);
+        
+        $endpoint->tpl->assign("tftp_selected", $tftp_checked);
 
         $endpoint->tpl->assign("ip", $_SERVER["SERVER_ADDR"]);
         $endpoint->tpl->assign("srvip", $endpoint->global_cfg['srvip']);

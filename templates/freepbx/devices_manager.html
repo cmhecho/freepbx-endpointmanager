@@ -131,7 +131,8 @@
         var fullurl = 'config.php?display=epm_config&quietmode=1&handler=file&file=ajax_select.html.php&module=endpointman';
         $('#adding').submit(function() {
             $(this).append('<input type="hidden" name="sub_type" value="add"/>');
-            //$('#devList tr:last').after('<tr><td>stuff</td></tr>');
+            $('#devList tr:last').after('<tr><td>stuff</td></tr>');
+            return false;
         });
         $('#go').submit(function() {
             var options = { 
@@ -141,6 +142,8 @@
                         brand = data[i]['brand'];
                     }
                     $('#spinner').toggle();
+                    alert('ok');
+                    console.log(data);
                 },
                 dataType:  'json'
             };
@@ -172,21 +175,27 @@
         });
     });
     
-    function delete_device(id) {
+    function delete_device(id, master_id) {
         if (confirm('Are you sure you want to delete this device?')) {
             //submit_wtype('delete_device',id);
+            $('#devid'+id).fadeOut('slow', function() {
+                $(this).remove();
+              });
+            $('#'+master_id).fadeOut('slow', function() {
+                $(this).remove();
+              });
         }
     }
     function popitup(url, name, id) {
         if(id != '0') {
-            newwindow=window.open(url + '&model_list=' + document.getElementById('model_new').value + '&template_list=' + document.getElementById('template_list').value + '&rand=' + new Date().getTime(),'name2','height=1000,width=950');
+            newwindow=window.open(url + '&model_list=' + document.getElementById('model_new').value + '&template_list=' + document.getElementById('template_list').value + '&rand=' + new Date().getTime(),'name2','height=1000,width=950,scrollbars=yes,location=no');
             if (window.focus) {newwindow.focus()}
             return false;
         }
     }
 
     function submit_stype(type,id) {
-        newwindow=window.open('config.php?display=epm_config&quietmode=1&handler=file&file=popup.html.php&module=endpointman&pop_type=edit_specifics&edit_id=' + id + '&rand=' + new Date().getTime(),'name2','height=700,width=750');
+        newwindow=window.open('config.php?display=epm_config&quietmode=1&handler=file&file=popup.html.php&module=endpointman&pop_type=edit_specifics&edit_id=' + id + '&rand=' + new Date().getTime(),'name2','height=700,width=750,scrollbars=yes,location=no');
         if (window.focus) {newwindow.focus()}
         return false;
     }
@@ -196,8 +205,8 @@
     {if condition="$no_add == FALSE"}
     <form id='go' action='config.php?type=tool&amp;display=epm_devices' method='POST'>
         <label><?php echo _('Search for new devices in netmask')?>
-            <input name="netmask" type="text" value="{$srvip}/24">
-            <input type="submit" name="button_go" id="button_go" value="<?php echo _('Go')?>">
+            <input name="netmask" type="text" value="{$netmask}">
+            <input type="Submit" name="button_go" id="button_go" value="<?php echo _('Go')?>">
         </label>
         <label>
             <input name="nmap" type="checkbox" value="1" checked><?php echo _('Use NMAP')?>
@@ -439,12 +448,12 @@
         <td align='center'><h3>Line</h3></td>
         <td align='center'><h3>Extension Number</h3></td>
         <td align='center'><h3>Template</h3></td>
-        <!--<td align='center'><h3>Specific</h3></td>-->
+        <td align='center'><h3>Specific</h3></td>
         <td align='center'><h3>Edit</h3></td>
         <td align='center'><h3>Delete</h3></td>
     </tr>
 	{loop name="list"}
-        <tr class="headerRow">
+        <tr class="headerRow" id="devid{$value.id}">
             <td align='center' width="5%"><div id="demo"><img src="assets/endpointman/images/circle_{if condition="$value.status.status === TRUE"}green{else}red{/if}.png" alt="{$value.status.ip}:{$value.status.port}"><input type="checkbox" name="selected[]" value="{$value.id}"></div></td>
             <td align='center' width='11%'>{$value.mac}</td>
             <td width="13%" align='center'>{$value.name}</td>
@@ -452,9 +461,9 @@
             <td width="10%" align='center'><div id="demo"><a><img src="assets/endpointman/images/expand.png" id="img2rowGroup{$value.master_id}" onclick="toggleDisplay(document.getElementById('devList'),'rowGroup{$value.master_id}')" title="Click to Expand Line Information"></a></div></td>
             <td width="19%" align='center'><div id="demo"><a><img src="assets/endpointman/images/expand.png" id="img3rowGroup{$value.master_id}" onclick="toggleDisplay(document.getElementById('devList'),'rowGroup{$value.master_id}')" title="Click to Expand Line Information"></a></div></td>
             <td align='center' width='15%'>{$value.template_name}</td>
-            <!--<td align='center'><div id="demo"><a href="#" onclick="submit_stype('edit',{$value.id});"><img src='assets/endpointman/images/edit.png' ALT='<?php echo _('Edit')?>' title='Edit Device' border='0'></a></div></td>-->
+            <td align='center'><div id="demo"><a href="#" onclick="submit_stype('edit',{$value.id});"><img src='assets/endpointman/images/edit.png' ALT='<?php echo _('Edit')?>' title='Edit Device' border='0'></a></div></td>
             <td align='center' width='9%'><div id="demo"><a href="#" onclick="submit_wtype('edit',{$value.id});"><img src='assets/endpointman/images/edit.png' ALT='<?php echo _('Edit')?>' title='Edit Device' border='0'></a></div></td>
-            <td align='center' width='7%'><div id="demo"><a href="#" onclick="delete_device({$value.id});"><img src='assets/endpointman/images/delete.png' ALT='<?php echo _('Delete')?>' title='Delete Device' border='0'></a></div></td>
+            <td align='center' width='7%'><div id="demo"><a href="#" onclick="delete_device({$value.id},{$value.master_id});"><img src='assets/endpointman/images/delete.png' ALT='<?php echo _('Delete')?>' title='Delete Device' border='0'></a></div></td>
         </tr>
         {loop name="value.line"}
         <tr class="rowGroup{$value.master_id} toggle_all" id="{$value.master_id}" style="display:none;">

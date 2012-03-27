@@ -78,7 +78,7 @@
   <td align='left'></td>
 </tr>
 <tr>
-  <td align='right'><?php echo _("Enable FreePBX ARI Module")?> (<a href="http://projects.colsolgrp.net/documents/29" target="_blank">What?</a>)</td>
+  <td align='right'><?php echo _("Enable FreePBX ARI Module")?> (<a href="http://wiki.provisioner.net/index.php/Endpoint_manager_manual_ari" target="_blank">What?</a>)</td>
   <td align='left'><label>
     <input type=checkbox name="enable_ari" {$ari_selected}>
   </label></td>
@@ -105,6 +105,12 @@
   <td align='right'><?php echo _("Allow Saving to Hard-Drive Configuration Files")?></td>
   <td align='left'><label>
     <input type=checkbox name="allow_hdfiles" {$hdfiles_selected}>
+  </label></td>
+</tr>
+<tr>
+  <td align='right'><?php echo _("Disable TFTP Server Check")?></td>
+  <td align='left'><label>
+    <input type=checkbox name="tftp_check" {$tftp_selected}>
   </label></td>
 </tr>
 <tr>
